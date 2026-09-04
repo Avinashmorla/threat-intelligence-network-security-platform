@@ -1,0 +1,8 @@
+[
+  { "timestamp": "2026-08-17T08:40:00", "event": "ConsoleLogin", "user": "developer", "src": "192.168.1.50", "result": "Success", "note": "normal login from office" },
+  { "timestamp": "2026-08-17T08:41:10", "event": "ConsoleLogin", "user": "admin", "src": "185.220.101.5", "result": "Failed", "note": "login attempt from unusual location" },
+  { "timestamp": "2026-08-17T08:41:25", "event": "ConsoleLogin", "user": "admin", "src": "185.220.101.5", "result": "Failed", "note": "login attempt from unusual location" },
+  { "timestamp": "2026-08-17T08:42:00", "event": "CreateAccessKey", "user": "admin", "src": "185.220.101.5", "result": "Success", "note": "new access key created right after failed logins" },
+  { "timestamp": "2026-08-17T08:43:00", "event": "StopLogging", "user": "admin", "src": "185.220.101.5", "result": "Success", "note": "CloudTrail logging stopped" },
+  { "timestamp": "2026-08-17T08:44:00", "event": "GetObject", "user": "developer", "src": "192.168.1.50", "result": "Success", "note": "normal S3 read" }
+]

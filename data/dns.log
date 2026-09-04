@@ -1,0 +1,24 @@
+# dns.log  ->  timestamp | source_ip | query_name | record_type
+# Normal browsing plus one host making many unique subdomain lookups (tunneling/exfil pattern).
+2026-08-17T08:10:00 | 192.168.1.15 | www.google.com | A
+2026-08-17T08:10:05 | 192.168.1.16 | github.com | A
+2026-08-17T08:10:09 | 192.168.1.15 | api.weather.com | A
+2026-08-17T08:11:00 | 192.168.1.23 | a01x9f.tunnel.evil-domain.com | A
+2026-08-17T08:11:02 | 192.168.1.23 | b72kd0.tunnel.evil-domain.com | A
+2026-08-17T08:11:04 | 192.168.1.23 | c19pza.tunnel.evil-domain.com | A
+2026-08-17T08:11:06 | 192.168.1.23 | d33mqe.tunnel.evil-domain.com | A
+2026-08-17T08:11:08 | 192.168.1.23 | e58wrt.tunnel.evil-domain.com | A
+2026-08-17T08:11:10 | 192.168.1.23 | f90lby.tunnel.evil-domain.com | A
+2026-08-17T08:11:12 | 192.168.1.23 | g11ncx.tunnel.evil-domain.com | A
+2026-08-17T08:11:14 | 192.168.1.23 | h27ohd.tunnel.evil-domain.com | A
+2026-08-17T08:11:16 | 192.168.1.23 | i64tgs.tunnel.evil-domain.com | A
+2026-08-17T08:11:18 | 192.168.1.23 | j82vku.tunnel.evil-domain.com | A
+2026-08-17T08:11:20 | 192.168.1.23 | k05zmn.tunnel.evil-domain.com | A
+2026-08-17T08:11:22 | 192.168.1.23 | l39abp.tunnel.evil-domain.com | A
+2026-08-17T08:11:24 | 192.168.1.23 | m71cdq.tunnel.evil-domain.com | A
+2026-08-17T08:11:26 | 192.168.1.23 | n18efr.tunnel.evil-domain.com | A
+2026-08-17T08:11:28 | 192.168.1.23 | o44ghs.tunnel.evil-domain.com | A
+2026-08-17T08:11:30 | 192.168.1.23 | p90ijt.tunnel.evil-domain.com | A
+2026-08-17T08:11:32 | 192.168.1.23 | q22klu.tunnel.evil-domain.com | A
+2026-08-17T08:11:34 | 192.168.1.23 | r57mnv.tunnel.evil-domain.com | A
+2026-08-17T08:12:00 | 192.168.1.16 | mail.google.com | A

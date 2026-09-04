@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# Generated at runtime (recreated by detect.py / report.py)
+findings.db
+report.txt
+
+# OS / editor metadata
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Secrets / env
+.env
+*.pem
+*.key

@@ -1,0 +1,29 @@
+# smtp.log  ->  timestamp | sender | source_ip | recipient
+# One message-send event per line. Normal sender plus one sender blasting many recipients.
+2026-08-17T08:30:00 | newsletter@corp.com | 192.168.1.20 | alice@corp.com
+2026-08-17T08:30:05 | newsletter@corp.com | 192.168.1.20 | bob@corp.com
+2026-08-17T08:31:00 | spammer@corp.com | 192.168.1.40 | user01@ext.com
+2026-08-17T08:31:01 | spammer@corp.com | 192.168.1.40 | user02@ext.com
+2026-08-17T08:31:02 | spammer@corp.com | 192.168.1.40 | user03@ext.com
+2026-08-17T08:31:03 | spammer@corp.com | 192.168.1.40 | user04@ext.com
+2026-08-17T08:31:04 | spammer@corp.com | 192.168.1.40 | user05@ext.com
+2026-08-17T08:31:05 | spammer@corp.com | 192.168.1.40 | user06@ext.com
+2026-08-17T08:31:06 | spammer@corp.com | 192.168.1.40 | user07@ext.com
+2026-08-17T08:31:07 | spammer@corp.com | 192.168.1.40 | user08@ext.com
+2026-08-17T08:31:08 | spammer@corp.com | 192.168.1.40 | user09@ext.com
+2026-08-17T08:31:09 | spammer@corp.com | 192.168.1.40 | user10@ext.com
+2026-08-17T08:31:10 | spammer@corp.com | 192.168.1.40 | user11@ext.com
+2026-08-17T08:31:11 | spammer@corp.com | 192.168.1.40 | user12@ext.com
+2026-08-17T08:31:12 | spammer@corp.com | 192.168.1.40 | user13@ext.com
+2026-08-17T08:31:13 | spammer@corp.com | 192.168.1.40 | user14@ext.com
+2026-08-17T08:31:14 | spammer@corp.com | 192.168.1.40 | user15@ext.com
+2026-08-17T08:31:15 | spammer@corp.com | 192.168.1.40 | user16@ext.com
+2026-08-17T08:31:16 | spammer@corp.com | 192.168.1.40 | user17@ext.com
+2026-08-17T08:31:17 | spammer@corp.com | 192.168.1.40 | user18@ext.com
+2026-08-17T08:31:18 | spammer@corp.com | 192.168.1.40 | user19@ext.com
+2026-08-17T08:31:19 | spammer@corp.com | 192.168.1.40 | user20@ext.com
+2026-08-17T08:31:20 | spammer@corp.com | 192.168.1.40 | user21@ext.com
+2026-08-17T08:31:21 | spammer@corp.com | 192.168.1.40 | user22@ext.com
+2026-08-17T08:31:22 | spammer@corp.com | 192.168.1.40 | user23@ext.com
+2026-08-17T08:31:23 | spammer@corp.com | 192.168.1.40 | user24@ext.com
+2026-08-17T08:31:24 | spammer@corp.com | 192.168.1.40 | user25@ext.com

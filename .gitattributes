@@ -1,0 +1,7 @@
+# Keep shell scripts LF so run.sh works under Linux / WSL / Git Bash
+*.sh text eol=lf
+
+# Log/data fixtures stay LF so line counts match across platforms
+*.log text eol=lf
+*.json text eol=lf
+*.sql text eol=lf

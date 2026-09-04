@@ -1,0 +1,10 @@
+# http.log  ->  timestamp | source_ip | method | path | status
+# Normal traffic plus a few classic web-attack payloads (SQL injection, path traversal).
+2026-08-17T08:20:01 | 192.168.1.30 | GET | /index.html | 200
+2026-08-17T08:20:04 | 192.168.1.31 | GET | /products?id=15 | 200
+2026-08-17T08:20:09 | 45.77.12.9 | GET | /login?user=' OR 1=1-- | 200
+2026-08-17T08:20:12 | 45.77.12.9 | GET | /items?id=1 UNION SELECT username,password FROM users | 200
+2026-08-17T08:20:18 | 45.77.12.9 | GET | /download?file=../../../etc/passwd | 404
+2026-08-17T08:20:25 | 192.168.1.32 | POST | /cart/add | 200
+2026-08-17T08:20:30 | 203.0.113.90 | GET | /static/../../windows/win.ini | 404
+2026-08-17T08:20:36 | 192.168.1.30 | GET | /about | 200
