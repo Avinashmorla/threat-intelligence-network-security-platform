@@ -1,149 +1,137 @@
 # Threat Intelligence & Network Security Analysis Platform
 
-A lightweight, educational **log-based threat detection and investigation platform** built with **Python, SQLite, SQL, and Bash**.
+A lightweight **security log analysis and threat detection platform** built with **Python, SQLite, SQL, and Bash**.
 
-The project analyzes security logs from multiple sources, applies rule-based detection techniques to identify suspicious activity, stores detected events as structured security findings, allows investigation of suspicious sources, and generates an incident report.
+The project simulates a small SOC-style detection workflow. It ingests security events from authentication, DNS, HTTP, SMTP, and cloud/API logs, applies explainable rule-based detection, converts suspicious activity into structured findings, stores them in SQLite, supports source-level investigation, and generates an incident report.
 
-The platform demonstrates a simplified **Security Operations Center (SOC) workflow**:
-
-```text
-Security Logs
-      ↓
-Log Parsing
-      ↓
-Threat Detection
-      ↓
-Security Findings
-      ↓
-SQLite Database
-      ↓
-Investigation
-      ↓
-Incident Report
-```
-
-> **Note:** This project performs log analysis only. It does not perform packet capture, live network sniffing, operate real SSH/SMTP servers, or connect to AWS/GuardDuty.
-
----
-
-## Features
-
-- Multi-source security log analysis
-- SSH brute-force detection
-- DNS anomaly / possible DNS tunneling detection
-- SQL injection detection
-- Path traversal detection
-- SMTP abuse detection
-- Cloud/API anomaly detection
-- Severity classification
-- Structured security findings
-- SQLite-based threat-data storage
-- SQL-based investigation
-- Source/IP investigation
-- Automated incident report generation
-- Bash-based pipeline automation
-
----
-
-## Project Structure
+## Architecture
 
 ```text
-threat-intel-platform/
-├── data/
-│   ├── auth.log
-│   ├── dns.log
-│   ├── http.log
-│   ├── smtp.log
-│   └── cloud_events.json
-│
-├── detectors.py
-├── detect.py
-├── investigate.py
-├── report.py
-├── queries.sql
-├── run.sh
-└── README.md
+                    ┌──────────────────────┐
+                    │     Security Logs     │
+                    ├──────────────────────┤
+                    │ auth.log              │
+                    │ dns.log               │
+                    │ http.log              │
+                    │ smtp.log              │
+                    │ cloud_events.json     │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │     detectors.py     │
+                    │                      │
+                    │  • Log Parsing       │
+                    │  • Threat Detection  │
+                    │  • Severity          │
+                    │  • Evidence          │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │      detect.py       │
+                    │   Detection Pipeline  │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │    findings.db       │
+                    │       SQLite         │
+                    └──────────┬───────────┘
+                               │
+                    ┌──────────┴──────────┐
+                    │                     │
+                    ▼                     ▼
+           ┌─────────────────┐   ┌─────────────────┐
+           │  queries.sql    │   │ investigate.py  │
+           │ SQL Investigation│   │ Source Analysis │
+           └────────┬────────┘   └────────┬────────┘
+                    │                     │
+                    └──────────┬──────────┘
+                               ▼
+                    ┌──────────────────────┐
+                    │      report.py       │
+                    │  Incident Reporting  │
+                    └──────────┬───────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │     report.txt       │
+                    └──────────────────────┘
+
+                    run.sh
+        Automates the complete pipeline
 ```
 
-### Main Components
+## What the Project Does
 
-**`detectors.py`**
+The platform takes raw security logs and transforms them into actionable security findings.
 
-Contains the log-parsing logic and the five threat-detection rules. Each detector analyzes a specific type of security event and produces a standardized finding.
+```text
+Raw Security Event
+        ↓
+Parse Event
+        ↓
+Apply Detection Rule
+        ↓
+Classify Severity
+        ↓
+Create Finding
+        ↓
+Store in SQLite
+        ↓
+Investigate
+        ↓
+Generate Report
+```
 
-**`detect.py`**
+Every finding follows a common structure:
 
-Acts as the main detection pipeline. It runs all detectors, stores the resulting findings in the SQLite database, and displays security alerts in the terminal.
+```text
+timestamp
+threat_type
+severity
+source
+description
+evidence
+```
 
-**`investigate.py`**
-
-Allows investigation of a specific source IP or sender and displays the associated findings, evidence, and recommended action.
-
-**`report.py`**
-
-Reads the findings database and generates a text-based security report containing statistics, suspicious sources, incidents, evidence, and recommended actions.
-
-**`queries.sql`**
-
-Contains SQL queries for manually investigating the stored security findings.
-
-**`run.sh`**
-
-Automates the complete workflow by checking the input files, running detection, and generating the report.
-
----
-
-## Log Sources
-
-The platform works with five types of security data:
-
-| Source | Purpose |
-|---|---|
-| `auth.log` | Authentication and login activity |
-| `dns.log` | DNS queries |
-| `http.log` | HTTP/web requests |
-| `smtp.log` | Email activity |
-| `cloud_events.json` | Cloud/API security events |
-
-The included data consists of small synthetic security logs containing mostly normal activity along with selected attack patterns.
+This allows findings from completely different log sources to be stored and investigated consistently.
 
 ---
 
-## Threat Detection
+## Detection Capabilities
 
-Each detector applies a simple and explainable rule to its corresponding log source.
+| Log Source | Detection | Rule | Severity |
+|---|---|---|---|
+| `auth.log` | SSH Brute Force | ≥10 failed logins from one IP | HIGH |
+| `dns.log` | DNS Anomaly | ≥15 unique subdomains from one IP/domain | MEDIUM |
+| `http.log` | SQL Injection | Detects common SQL injection patterns | HIGH |
+| `http.log` | Path Traversal | Detects traversal patterns such as `../` and `/etc/passwd` | HIGH |
+| `smtp.log` | SMTP Abuse | Sender targets >20 recipients | MEDIUM |
+| `cloud_events.json` | Cloud/API Anomaly | Failed logins and sensitive API actions | MEDIUM/HIGH |
 
 ### SSH Brute Force
 
-Authentication failures are grouped by source IP.
+Failed authentication attempts are grouped by source IP.
 
-If a single IP produces **10 or more failed login attempts**, it is classified as:
+When an IP reaches the configured threshold of **10 or more failures**, the activity is classified as `SSH_BRUTE_FORCE`.
 
-```text
-Threat Type: SSH_BRUTE_FORCE
-Severity: HIGH
-```
-
-The finding includes the number of attempts and usernames targeted.
+The finding records the source, number of attempts, targeted usernames, and supporting evidence.
 
 ### DNS Anomaly
 
-DNS queries are grouped by source IP and base domain.
+DNS queries are grouped by **source IP and base domain**.
 
-If a source generates **15 or more unique subdomains** for the same domain, it is flagged as a possible DNS tunneling or data-exfiltration pattern.
+A source generating **15 or more unique subdomains** for the same domain is flagged as a possible DNS tunneling or data-exfiltration pattern.
 
-```text
-Threat Type: DNS_ANOMALY
-Severity: MEDIUM
-```
+This is a heuristic and does not by itself prove malicious activity.
 
-This is a heuristic detection and does not prove that DNS tunneling is occurring.
+### Web Attack Detection
 
-### Web Injection
+HTTP request paths are inspected for common attack strings.
 
-HTTP request paths are checked for common attack patterns.
-
-The detector looks for patterns associated with:
+The detector identifies:
 
 - SQL injection
 - Path traversal
@@ -157,92 +145,99 @@ UNION SELECT
 /etc/passwd
 ```
 
-SQL injection is mapped to **OWASP A03:2021 - Injection**, while path traversal is mapped to **OWASP A01:2021 - Broken Access Control**.
-
-These findings are classified as:
-
-```text
-Threat Type: WEB_INJECTION
-Severity: HIGH
-```
+SQL injection is associated with **OWASP A03:2021 - Injection**, while path traversal is associated with **OWASP A01:2021 - Broken Access Control**.
 
 ### SMTP Abuse
 
 Email activity is grouped by sender.
 
-If one sender targets **more than 20 recipients**, the activity is classified as possible spam, compromised-mailbox activity, or messaging abuse.
-
-```text
-Threat Type: SMTP_ABUSE
-Severity: MEDIUM
-```
+A sender targeting more than **20 recipients** is flagged as potential spam, compromised-mailbox activity, or messaging abuse.
 
 ### Cloud/API Anomaly
 
-Cloud events are provided as local JSON data.
+Cloud events are represented as local JSON data.
 
-The detector identifies events such as:
+The detector looks for suspicious activity such as:
 
 - Failed console logins
-- Sensitive API actions
-- Security-control tampering
+- `CreateAccessKey`
+- `PutUserPolicy`
+- `DeleteTrail`
+- `StopLogging`
+- `AuthorizeSecurityGroupIngress`
 
-Examples of sensitive actions include:
-
-```text
-CreateAccessKey
-PutUserPolicy
-DeleteTrail
-StopLogging
-AuthorizeSecurityGroupIngress
-```
-
-These events produce:
-
-```text
-Threat Type: CLOUD_API_ANOMALY
-Severity: MEDIUM / HIGH
-```
-
-The cloud component is a **local simulation of GuardDuty-style findings** and does not connect to an AWS account or API.
+This component is a **local simulation of GuardDuty-style detection** and does not connect to AWS.
 
 ---
 
-## Security Findings
-
-All detectors produce findings using a common structure:
+## Project Structure
 
 ```text
-timestamp
-threat_type
-severity
-source
-description
-evidence
+threat-intel-platform/
+│
+├── data/
+│   ├── auth.log
+│   ├── dns.log
+│   ├── http.log
+│   ├── smtp.log
+│   └── cloud_events.json
+│
+├── detectors.py
+├── detect.py
+├── investigate.py
+├── report.py
+├── queries.sql
+├── run.sh
+├── .gitignore
+├── .gitattributes
+└── README.md
 ```
 
-This allows different types of security events to be stored and investigated consistently.
+### Core Components
 
-For example:
+**`detectors.py`**
+
+Contains the log parsers and individual threat-detection functions. Each detector returns findings using the same structure.
+
+**`detect.py`**
+
+Runs the complete detection pipeline, executes all detectors, creates/updates the SQLite database, stores findings, and displays alerts.
+
+**`investigate.py`**
+
+Investigates a particular source IP or sender by querying all associated findings and displaying their evidence and recommended actions.
+
+**`queries.sql`**
+
+Provides SQL queries for security investigation, including high-severity findings, threat counts, source counts, and suspicious sources.
+
+**`report.py`**
+
+Analyzes the findings database and generates a human-readable `report.txt` containing security findings, statistics, evidence, and recommendations.
+
+**`run.sh`**
+
+Automates the complete workflow:
 
 ```text
-SSH_BRUTE_FORCE
-HIGH
-203.0.113.77
-Multiple failed authentication attempts
+Check Input Files
+       ↓
+Run Detection
+       ↓
+Generate Report
 ```
 
 ---
 
-## SQLite Database
+## Data Storage
 
-Detected findings are stored in a SQLite database named:
+Detected events are stored in a SQLite database:
 
 ```text
 findings.db
 ```
 
-The database contains a `findings` table:
+The database contains a single `findings` table:
 
 ```sql
 CREATE TABLE findings (
@@ -256,51 +251,55 @@ CREATE TABLE findings (
 );
 ```
 
-SQLite was chosen because the project uses a small local dataset and does not require a separate database server.
-
-Each detection run refreshes the findings so that the database reflects the current input logs.
+SQLite was selected because the project uses a small local dataset and does not require a separate database server.
 
 ---
 
 ## Investigation
 
-The project supports investigation of a specific source.
+Once suspicious activity has been detected, a specific source can be investigated.
 
-For example:
+Example:
 
 ```bash
 python investigate.py 203.0.113.77
 ```
 
-The investigation performs a source-based database query and displays:
+The investigation retrieves findings associated with that source and displays:
 
-- Detected threats
+- Threat type
 - Severity
-- Evidence
 - Description
+- Evidence
 - Recommended action
 
-This represents a simplified:
+This provides a simple incident-response workflow:
 
 ```text
-Detection → Finding → Evidence → Investigation → Recommendation
+Detection
+    ↓
+Finding
+    ↓
+Evidence
+    ↓
+Source Investigation
+    ↓
+Recommended Action
 ```
-
-workflow.
 
 ---
 
-## SQL Investigation
+## SQL Analysis
 
-The `queries.sql` file provides SQL queries for investigating the findings database.
+The `queries.sql` file provides investigation queries for the findings database.
 
-The queries cover:
+It includes queries for:
 
-- All findings
-- High-severity findings
+- All security findings
+- HIGH-severity findings
 - Findings grouped by threat type
 - Findings grouped by source
-- Most suspicious sources
+- Top suspicious sources
 
 Example:
 
@@ -310,7 +309,7 @@ FROM findings
 WHERE severity = 'HIGH';
 ```
 
-If the SQLite CLI is installed:
+If the SQLite CLI is available:
 
 ```bash
 sqlite3 findings.db < queries.sql
@@ -320,144 +319,160 @@ sqlite3 findings.db < queries.sql
 
 ## Incident Reporting
 
-After detection, `report.py` can generate:
-
-```text
-report.txt
-```
-
-The report includes:
-
-- Total findings
-- Findings by severity
-- Findings by threat type
-- Top suspicious sources
-- Detailed incidents
-- Evidence
-- Recommended actions
-
-Run:
+After detection, the project can generate a security report:
 
 ```bash
 python report.py
 ```
 
-This provides a simple security review report that can be used to summarize the detected activity.
+Output:
+
+```text
+report.txt
+```
+
+The report summarizes:
+
+- Total findings
+- Severity distribution
+- Threat types
+- Suspicious sources
+- Detailed incidents
+- Evidence
+- Recommended actions
+
+This provides a simple security-review artifact from the detected activity.
 
 ---
 
-## How to Run
+## Installation & Usage
+
+### Requirements
+
+- Python 3.x
+- Bash for `run.sh`
+- SQLite CLI is optional
+
+The Python implementation uses standard-library modules and does not require external packages.
 
 ### Windows PowerShell
 
-Run the components individually:
+Run the pipeline step by step:
 
 ```powershell
 python detect.py
-python report.py
 python investigate.py 203.0.113.77
+python report.py
 ```
 
 ### Linux / macOS / WSL / Git Bash
 
-The complete workflow can be automated using:
+Run the complete pipeline:
 
 ```bash
 chmod +x run.sh
 ./run.sh
 ```
 
-The script performs:
+Or run the components individually:
 
-```text
-1. Check input logs
-2. Run threat detection
-3. Generate security report
+```bash
+python detect.py
+python investigate.py 203.0.113.77
+python report.py
 ```
 
 ---
 
-## Technologies Used
+## Technologies
 
-- **Python** — Log parsing, detection rules, investigation, and reporting
+- **Python** — Log parsing, detection, investigation, and reporting
 - **SQLite** — Structured security-finding storage
-- **SQL** — Threat-data investigation and analysis
+- **SQL** — Threat investigation and analysis
 - **Bash** — Pipeline automation
 - **JSON** — Cloud/API event representation
 - **Git** — Version control
 
 ---
 
-## Project Workflow
+## Design Approach
 
-The complete platform follows this workflow:
+The project intentionally uses **simple, deterministic, and explainable detection rules**.
+
+Instead of treating detection as a black box, every finding can be traced back to:
 
 ```text
-                ┌─────────────────┐
-                │   Security Logs │
-                └────────┬────────┘
-                         ↓
-                ┌─────────────────┐
-                │  Python Parser  │
-                └────────┬────────┘
-                         ↓
-                ┌─────────────────┐
-                │ Detection Rules │
-                └────────┬────────┘
-                         ↓
-                ┌─────────────────┐
-                │ Security        │
-                │ Findings        │
-                └────────┬────────┘
-                         ↓
-                ┌─────────────────┐
-                │ SQLite Database │
-                └───────┬─────────┘
-                        ↓
-             ┌──────────┴──────────┐
-             ↓                     ↓
-      SQL Investigation      Source Investigation
-             │                     │
-             └──────────┬──────────┘
-                        ↓
-                ┌─────────────────┐
-                │ Incident Report │
-                └─────────────────┘
+Input Log
+    ↓
+Detection Rule
+    ↓
+Finding
+    ↓
+Evidence
+    ↓
+Investigation
+    ↓
+Recommendation
+```
+
+This makes the detection logic easy to understand, test, investigate, and extend.
+
+Adding another detector can follow the same pattern:
+
+```text
+New Log Source
+      ↓
+New detect_*() function
+      ↓
+Standard Finding
+      ↓
+SQLite
+      ↓
+Existing Investigation & Reporting
 ```
 
 ---
 
 ## Limitations
 
-This project intentionally uses simple, explainable detection rules.
+This is an educational/local security-analysis platform and is not intended to replace a production SIEM or IDS.
 
-It does **not** currently provide:
+It currently does not provide:
 
 - Real-time log streaming
-- Packet-level network analysis
+- Packet capture or network sniffing
 - Machine-learning detection
 - Production SIEM functionality
 - Real AWS/GuardDuty integration
-- Automated blocking or firewall actions
 - External threat-intelligence feeds
+- Automated firewall/blocking actions
+- Real SSH or SMTP servers
 
-The project is designed to demonstrate the core concepts of **security log analysis, threat detection, investigation, SQL analysis, automation, and security reporting**.
+The cloud-security component is a **local simulation**, and the included logs are synthetic.
 
 ---
 
 ## Future Improvements
 
-Possible extensions include:
-
 - Real-time log ingestion
 - Configurable detection thresholds
-- Allow-lists to reduce false positives
-- Additional OWASP detection rules
 - Time-window based detection
+- Allow-lists for reducing false positives
+- Additional OWASP detection rules
 - Threat-intelligence API integration
 - SIEM integration
-- Web-based security dashboard
 - AWS CloudTrail/GuardDuty integration
-- Unit testing for detection rules
-- HTML/PDF report generation
-- Machine-learning based anomaly detection
+- Web-based security dashboard
+- Automated alerting
+- Unit tests for detection rules
+- HTML/PDF security reports
+
+---
+
+## Project Goal
+
+The goal of this project is to demonstrate a complete, understandable security-analysis pipeline that connects **log analysis, threat detection, structured security data, SQL investigation, incident investigation, automation, and reporting** in a single project.
+
+```text
+Collect → Parse → Detect → Store → Investigate → Report
+```
